@@ -52,7 +52,7 @@ public class BookRepositoryTest {
         book.setAuthor("Test Author");
         book.setTitle("test");
         book.setPageCount(1000);
-//        book.setPerson(savedPerson);
+        book.setPerson(savedPerson);
 
         //When
         Book result = bookRepository.save(book);

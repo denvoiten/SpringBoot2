@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Slf4j
@@ -35,33 +33,6 @@ public class BookServiceImpl implements BookService {
 
         Book savedBook = bookRepository.save(book);
         log.info("Saved book: {}", savedBook);
-        return bookMapper.bookToBookDto(savedBook);
-    }
-
-    @Override
-    public BookDto updateBook(BookDto bookDto, Long bookId) {
-        if (Objects.isNull(bookDto)) {
-            throw new IllegalArgumentException("Book for update is null");
-        }
-        Book book = bookMapper.bookDtoToBook(bookDto);
-        log.info("Mapped book: {}", book);
-
-        Optional<Book> bookForUpdate = bookRepository.findByIdForUpdate(bookId);
-        if (bookForUpdate.isPresent()) {
-            log.info("Book before update: {}", bookForUpdate);
-            Book updatedBook = bookForUpdate.get();
-
-            updatedBook.setTitle(book.getTitle());
-            updatedBook.setAuthor(book.getAuthor());
-            updatedBook.setPageCount(book.getPageCount());
-            updatedBook.setUserId(book.getUserId());
-
-            bookRepository.save(updatedBook);
-            log.info("Updated book: {}", updatedBook);
-            return bookMapper.bookToBookDto(updatedBook);
-        }
-
-        Book savedBook = bookRepository.save(book);
         return bookMapper.bookToBookDto(savedBook);
     }
 
@@ -93,15 +64,8 @@ public class BookServiceImpl implements BookService {
     @Override
     public Collection<BookDto> getBooksByUserId(Long userId) {
         log.info("Get all books by User ID: {}");
-        return bookRepository.findAllByUserId(userId).stream()
+        return bookRepository.findByPersonId(userId).stream()
                 .map(bookMapper::bookToBookDto)
                 .toList();
-    }
-
-    @Override
-    public void deleteBookByUserId(Long userId) {
-        log.info("Delete all books by User ID: {}");
-        bookRepository.deleteByUserId(userId);
-        log.info("All Books with User ID: {} has been deleted.", userId);
     }
 }

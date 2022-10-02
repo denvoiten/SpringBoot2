@@ -3,6 +3,7 @@ package com.edu.ulab.app.service.impl;
 import com.edu.ulab.app.dto.UserDto;
 import com.edu.ulab.app.entity.Person;
 import com.edu.ulab.app.exception.NotFoundException;
+import com.edu.ulab.app.mapper.PersonRowMapper;
 import com.edu.ulab.app.mapper.UserMapper;
 import com.edu.ulab.app.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -73,13 +74,7 @@ public class UserServiceImplTemplate implements UserService {
         log.info("Get User with ID: {}", id);
         Person user;
         try {
-            user = jdbcTemplate.queryForObject(SELECT_BY_ID_SQL,
-                    (resultSet, row) ->
-                            new Person(resultSet.getLong("ID"),
-                                    resultSet.getString("FULL_NAME"),
-                                    resultSet.getString("TITLE"),
-                                    resultSet.getInt("AGE")),
-                    id);
+            user = jdbcTemplate.queryForObject(SELECT_BY_ID_SQL, new PersonRowMapper(), id);
         } catch (Exception e) {
             throw new NotFoundException(String.format("User with id %s not found", id));
         }

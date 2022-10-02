@@ -5,7 +5,6 @@ import com.edu.ulab.app.dto.UserDto;
 import com.edu.ulab.app.exception.NotFoundException;
 import com.edu.ulab.app.mapper.BookMapper;
 import com.edu.ulab.app.mapper.UserMapper;
-
 import com.edu.ulab.app.service.impl.BookServiceImplTemplate;
 import com.edu.ulab.app.service.impl.UserServiceImplTemplate;
 import com.edu.ulab.app.web.request.UserBookRequest;
@@ -137,7 +136,8 @@ public class UserDataFacade {
     }
 
     public void deleteUserWithBooks(Long userId) {
-        bookService.deleteBookByUserId(userId);
+        bookService.getBooksByUserId(userId)
+                .forEach(bookDto -> bookService.deleteBookById(bookDto.getId()));
         userService.deleteUserById(userId);
         log.info("Deleted user with ID: {}", userId);
     }

@@ -4,6 +4,7 @@ import com.edu.ulab.app.dto.BookDto;
 import com.edu.ulab.app.entity.Book;
 import com.edu.ulab.app.exception.NotFoundException;
 import com.edu.ulab.app.mapper.BookMapper;
+import com.edu.ulab.app.mapper.BookRowMapper;
 import com.edu.ulab.app.service.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -56,32 +57,9 @@ public class BookServiceImplTemplate implements BookService {
     }
 
     @Override
-    public BookDto updateBook(BookDto bookDto, Long bookId) {
-        if (Objects.isNull(bookDto)) {
-            throw new IllegalArgumentException("Book for update is null");
-        }
-
-        if (jdbcTemplate.update(UPDATE_SQL,
-                bookDto.getTitle(), bookDto.getAuthor(),
-                bookDto.getPageCount(), bookDto.getAuthor(), bookId) != 0) {
-            log.info("Updated book: {}", bookDto);
-            return bookDto;
-        } else {
-            throw new NotFoundException(String.format("Book with ID %s not found", bookId));
-        }
-    }
-
-    @Override
     public BookDto getBookById(Long id) {
         log.info("Get Book with ID: {}", id);
-        Book book = jdbcTemplate.queryForObject(SELECT_BY_ID_SQL,
-                (resultSet, row) ->
-                        new Book(resultSet.getLong("ID"),
-                                resultSet.getLong("USER_ID"),
-                                resultSet.getString("TITLE"),
-                                resultSet.getString("AUTHOR"),
-                                resultSet.getInt("PAGE_COUNT")),
-                id);
+        Book book = jdbcTemplate.queryForObject(SELECT_BY_ID_SQL, new BookRowMapper(), id);
         log.info("The book - {} was found.", book);
         if (Objects.isNull(book)) {
             throw new NotFoundException(String.format("Book with id %s not found", id));
@@ -98,7 +76,6 @@ public class BookServiceImplTemplate implements BookService {
         }
     }
 
-    @Override
     public void deleteBookByUserId(Long userId) {
         if (jdbcTemplate.update(DELETE_BY_USER_ID_SQL, userId) != 0) {
             log.info("Book with ID {} has been deleted", userId);

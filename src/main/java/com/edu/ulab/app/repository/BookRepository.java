@@ -11,12 +11,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookRepository extends CrudRepository<Book, Long> {
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select b from Book b where b.id = :id")
-    Optional<Book> findByIdForUpdate(long id);
-
-    Collection<Book> findAllByUserId(Long userId);
-
-    void deleteByUserId(Long userId);
+    List<Book> findByPersonId(Long id);
 }

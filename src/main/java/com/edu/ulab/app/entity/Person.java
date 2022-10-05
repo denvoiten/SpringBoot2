@@ -30,7 +30,7 @@ public class Person {
     private int age;
 
 //    @Column(nullable = false)
-//    private int count; todo
+//    private String city;
 
     @OneToMany(mappedBy = "person", cascade = {
             CascadeType.MERGE,

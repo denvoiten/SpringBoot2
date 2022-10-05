@@ -11,8 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.vladmihalcea.sql.SQLStatementCountValidator.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Тесты репозитория {@link UserRepository}.
@@ -35,16 +40,13 @@ public class UserRepositoryTest {
             "classpath:sql/3_insert_book_data.sql"
     })
     void insertPerson_thenAssertDmlCount() {
-        //Given
         Person person = new Person();
         person.setAge(111);
         person.setTitle("reader");
         person.setFullName("Test Test");
 
-        //When
         Person result = userRepository.save(person);
 
-        //Then
         assertThat(result.getAge()).isEqualTo(111);
         assertSelectCount(1);
         assertInsertCount(0);
@@ -52,10 +54,88 @@ public class UserRepositoryTest {
         assertDeleteCount(0);
     }
 
-    // update
-    // get
-    // get all
-    // delete
+    @DisplayName("Обновить пользователя")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+            "classpath:sql/2_insert_person_data.sql",
+            "classpath:sql/3_insert_book_data.sql"
+    })
+    void updatePerson_thenAssertDmlCount() {
+        Long userId = 1001L;
+        Person person = userRepository.findById(userId)
+                .orElse(new Person());
 
-    // * failed
+        person.setFullName("new user name");
+        person.setAge(22);
+        person = userRepository.save(person);
+
+        assertThat(person.getFullName()).isEqualTo("new user name");
+        assertThat(person.getTitle()).isEqualTo("reader");
+        assertThat(person.getAge()).isEqualTo(22);
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Получить пользователя по ID")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+            "classpath:sql/2_insert_person_data.sql",
+            "classpath:sql/3_insert_book_data.sql"
+    })
+    void getPersonById_thenAssertDmlCount() {
+        Long userId = 1001L;
+
+        Person actual = userRepository.findById(userId)
+                .orElse(new Person());
+
+        assertThat(actual.getId()).isEqualTo(userId);
+        assertThat(actual.getAge()).isEqualTo(55);
+        assertThat(actual.getFullName()).isEqualTo("default uer");
+        assertThat(actual.getTitle()).isEqualTo("reader");
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Удалить пользователя по ID")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+            "classpath:sql/2_insert_person_data.sql",
+            "classpath:sql/3_insert_book_data.sql"
+    })
+    public void deleteUserById_Test() {
+        Long userId = 1001L;
+
+        userRepository.deleteById(userId);
+
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Получение всех пользователей.")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+            "classpath:sql/2_insert_person_data.sql",
+            "classpath:sql/3_insert_book_data.sql"
+    })
+    void getAllPerson_thenAssertDmlCount() {
+        List<Person> personList = new ArrayList<>();
+        userRepository.findAll().forEach(personList::add);
+
+        assertEquals(1, personList.size());
+
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
 }

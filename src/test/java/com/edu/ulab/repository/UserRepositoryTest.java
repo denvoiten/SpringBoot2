@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.vladmihalcea.sql.SQLStatementCountValidator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
@@ -110,6 +113,25 @@ public class UserRepositoryTest {
         Long userId = 1001L;
 
         userRepository.deleteById(userId);
+
+        assertSelectCount(1);
+        assertInsertCount(0);
+        assertUpdateCount(0);
+        assertDeleteCount(0);
+    }
+
+    @DisplayName("Получение всех пользователей.")
+    @Test
+    @Rollback
+    @Sql({"classpath:sql/1_clear_schema.sql",
+            "classpath:sql/2_insert_person_data.sql",
+            "classpath:sql/3_insert_book_data.sql"
+    })
+    void getAllPerson_thenAssertDmlCount() {
+        List<Person> personList = new ArrayList<>();
+        userRepository.findAll().forEach(personList::add);
+
+        assertEquals(1, personList.size());
 
         assertSelectCount(1);
         assertInsertCount(0);
